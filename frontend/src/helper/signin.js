@@ -14,6 +14,9 @@ const cognitoAuthConfig = {
 
 if (import.meta.env.DEV) {
     cognitoAuthConfig.redirect_uri = "http://localhost:5173";
+} else {
+    // redirect to the website
+    cognitoAuthConfig.redirect_uri = window.location.origin;
 }
 
 // create a UserManager instance
@@ -23,7 +26,7 @@ export const userManager = new UserManager({
 
 export async function signOutRedirect () {
     const clientId = "sep7sl8h18qssf0tc94p9pc3r";
-    const logoutUri = "http://localhost:5173";
+    const logoutUri = cognitoAuthConfig.redirect_uri;
     const cognitoDomain = "https://us-east-2d46kxnfgn.auth.us-east-2.amazoncognito.com";
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 };

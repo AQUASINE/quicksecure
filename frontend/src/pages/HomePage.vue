@@ -9,25 +9,14 @@ const incidentStore = useIncidentsStore();
 
 const chart = ref(null);
 
-userManager.signinCallback().then((user) => {
-  console.log('Sign In Callback', user)
-  userStore.profile = user.profile;
-  userStore.accessToken = user.access_token;
-  userStore.idToken = user.id_token;
-  userStore.refreshToken = user.refresh_token;
-}).catch((error) => {
-  console.log('Sign In Callback Not Successful')
-})
+
 
 const signIn = async () => {
   console.log('Sign In')
   await userManager.signinRedirect();
 }
 
-const signOut = async () => {
-  console.log('Sign Out')
-  await signOutRedirect();
-}
+
 
 onMounted(async () => {
   await incidentStore.fetchIncidents();
@@ -35,64 +24,77 @@ onMounted(async () => {
 })
 
 const renderChart = () => {
-  const data = incidentStore.incidents.map(d => ({ date: new Date(d.startTime), value: 1 }));
+  const data = incidentStore.incidents.map(d => ({ date: new Date(d.startTime * 1000), value: 1 }));
+
+  console.log(data);
 
   const svg = d3.select(chart.value)
       .attr("width", 600)
-      .attr("height", 300);
+      .attr("height", 250)
+      .attr("viewBox", [0, -20, 600, 230]);
 
+  // plot incidents started by month
   const x = d3.scaleTime()
       .domain(d3.extent(data, d => d.date))
-      .range([0, 600]);
+      .range([40, 560]);
+
+  const histogram = d3.histogram()
+      .value(d => d.date)
+      .domain(x.domain())
+      .thresholds(x.ticks(d3.timeMonth));
+
+  const bins = histogram(data);
 
   const y = d3.scaleLinear()
-      .domain([0, d3.max(data, d => d.value)])
-      .range([300, 0]);
+      .domain([0, d3.max(bins, d => d.length)])
+      .nice()
+      .range([200, 0]);
 
   svg.append("g")
-      .call(d3.axisBottom(x))
-      .attr("transform", "translate(0,300)");
+      .attr("fill", "steelblue")
+    .selectAll("rect")
+    .data(bins)
+    .join("rect")
+      .attr("x", d => x(d.x0) + 1)
+      .attr("width", d => Math.max(0, x(d.x1) - x(d.x0) - 1))
+      .attr("y", d => y(d.length))
+      .attr("height", d => y(0) - y(d.length));
+
+  const axisBottom = d3.axisBottom(x)
+      .ticks(d3.timeMonth)
+      .tickFormat(d3.timeFormat("%b %Y"));
 
   svg.append("g")
-      .call(d3.axisLeft(y));
+      .call(axisBottom)
+      .attr("transform", "translate(0,200)");
 
-  svg.selectAll(".bar")
-      .data(data)
-      .enter()
-      .append("rect")
-      .attr("x", d => x(d.date))
-      .attr("y", d => y(d.value))
-      .attr("width", 5)
-      .attr("height", d => 300 - y(d.value))
-      .attr("fill", "steelblue");
+  // only show whole numbers on the y-axis, but allow d3 to decide how many ticks to show
+  // don't show a tick more than once though
+  const axisLeft = d3.axisLeft(y)
+      .ticks(5)
+      .tickFormat(d3.format("d"));
+
+
+
+  svg.append("g")
+      .call(axisLeft)
+      .attr("transform", "translate(40,0)");
+
+  svg.node();
+
 };
 </script>
 
 <template>
   <div>
     <h1>
-      Quicksecure
+      Home
     </h1>
-    <p>
-      <v-icon icon="mdi-home" />
-      This is the main page of Quicksecure. I will need to add:
-    </p>
-    <ul>
-      <li>Incident Forms</li>
-      <li>Incident List</li>
-      <li>Stats</li>
-      <li>Sidebar</li>
-    </ul>
     <v-container>
-      <h1>Incident Statistics</h1>
+      <h2>Incident Statistics</h2>
       <svg ref="chart"></svg>
+      <p>This is the number of incidents reported by month in 2025.</p>
     </v-container>
-    <button @click="signIn">
-      Sign In
-    </button>
-    <button @click="signOut">
-      Sign Out
-    </button>
   </div>
 </template>
 

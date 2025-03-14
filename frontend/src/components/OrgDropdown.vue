@@ -18,7 +18,7 @@ const onOrganizationChange = (orgId) => {
 };
 
 const createOrganization = () => {
-  router.push('/create-organization');
+  router.push('/organizations/new');
 };
 </script>>
 

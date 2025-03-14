@@ -5,6 +5,8 @@ import {
     createIncident,
     updateIncident,
     deleteIncident,
+    addIncidentUpdate,
+    setIncidentStatus,
     getOrganizations,
     createOrganization
 } from "./api/api.js";
@@ -24,6 +26,14 @@ export const useUserStore = defineStore('user', () => {
 }, {
     persist: true
 })
+
+export const useUiStore = defineStore('ui', () => {
+    const loading = ref(true);
+
+    return {
+        loading
+    }
+});
 
 export const useIncidentsStore = defineStore('incidents', () => {
     const incidents = ref([]);
@@ -47,6 +57,16 @@ export const useIncidentsStore = defineStore('incidents', () => {
         await fetchIncidents();
     }
 
+    const addUpdateToIncident = async (incidentId, title, content) => {
+        await addIncidentUpdate(incidentId, title, content);
+        await fetchIncidents();
+    }
+
+    const updateIncidentStatus = async (incidentId, status) => {
+        await setIncidentStatus(incidentId, status);
+        await fetchIncidents();
+    }
+
     fetchIncidents().then(r => console.log("Incidents fetched: " + incidents.value));
 
     return {
@@ -55,6 +75,8 @@ export const useIncidentsStore = defineStore('incidents', () => {
         addIncident,
         editIncident,
         removeIncident,
+        addUpdateToIncident,
+        updateIncidentStatus
     }
 }, {
     persist: true

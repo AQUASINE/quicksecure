@@ -17,9 +17,6 @@ const getHeaders = () => {
     return {
         headers: {
             'Authorization': `Bearer ${userStore.idToken}`,
-            "Access-Control-Request-Method": "GET",
-            origin: window.location.origin,
-            "Access-Control-Request-Headers": "Authorization"
         }
     }
 
@@ -45,15 +42,21 @@ export const deleteIncident = async (incidentId) => {
     return response.data;
 };
 
+export const addIncidentUpdate = async (incidentId, title, content) => {
+    console.log("incidentId: ", incidentId)
+    console.log("title: ", title)
+    console.log("content: ", content)
+    const response = await axios.post(`${API_BASE_URL}/addUpdateToIncident`, {incidentId, title, content}, getHeaders());
+    return response.data;
+}
+
+export const setIncidentStatus = async (incidentId, status) => {
+    const response = await axios.post(`${API_BASE_URL}/setIncidentStatus`, {incidentId, status}, getHeaders());
+    return response.data;
+}
+
 export const getOrganizations = async () => {
-    const response = await axios.get(`${API_BASE_URL}/organization`, {
-        headers: {
-            'Authorization': getAuthHeader(),
-            "Access-Control-Request-Method": "GET",
-            origin: window.location.origin,
-            "Access-Control-Request-Headers": "Authorization"
-        }
-    });
+    const response = await axios.get(`${API_BASE_URL}/organization`, getHeaders());
     return response.data;
 };
 
