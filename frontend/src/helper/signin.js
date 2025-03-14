@@ -1,7 +1,8 @@
 import { UserManager, Log } from "oidc-client-ts";
 
-Log.setLogger(console);
-Log.setLevel(Log.DEBUG);
+// re-enable if having issues with login
+// Log.setLogger(console);
+// Log.setLevel(Log.DEBUG);
 
 const cognitoAuthConfig = {
     authority: "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_d46KXnFGn",
@@ -22,7 +23,7 @@ export const userManager = new UserManager({
 
 export async function signOutRedirect () {
     const clientId = "sep7sl8h18qssf0tc94p9pc3r";
-    const logoutUri = "/logout";
+    const logoutUri = "http://localhost:5173";
     const cognitoDomain = "https://us-east-2d46kxnfgn.auth.us-east-2.amazoncognito.com";
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 };
